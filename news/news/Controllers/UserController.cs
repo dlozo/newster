@@ -17,7 +17,7 @@ namespace news.Controllers
             ///Get values from the form entered by the user in /Default/Login.cshtml
             string tmpUsername = Request["registerUsername"];
             string tmpEmail = Request["registerEmail"];
-            string tmpPassword = HelpClass.Encrypt(Request["registerPassword"]);
+            string tmpPassword = Request["registerPassword"];
 
             if(!HelpClass.ValidateEmail(tmpEmail) || tmpUsername.Length <= 1 || 
                 tmpUsername.Length > 15 || tmpPassword.Length<6)
@@ -33,10 +33,12 @@ namespace news.Controllers
                 ///Connect to dB and create user
                 using (NewsterContext nc = new NewsterContext())
                 {
+                    string passwdEncrypted = HelpClass.Encrypt(tmpPassword);
+
                     ///Check for existing username
-                    if(nc.Users.Where(x=>x.UserName.ToLower() == tmpUsername.ToLower()).Count() == 0)
+                    if (nc.Users.Where(x=>x.UserName.ToLower() == tmpUsername.ToLower()).Count() == 0)
                     {
-                        User tmpUser = new User() { UserName = tmpUsername, Email = tmpEmail, Password = tmpPassword,Confirmed=false };
+                        User tmpUser = new User() { UserName = tmpUsername, Email = tmpEmail, Password = passwdEncrypted ,Confirmed=false };
                         nc.Users.Add(tmpUser);
                         nc.SaveChanges();
                     }
